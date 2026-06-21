@@ -26,6 +26,10 @@ vendor/
 .env.local
 .env.*.local
 
+# Config (local overrides, keep config.yaml as template)
+config.local.yaml
+config.*.local.yaml
+
 # ---------- IDE / Editor ----------
 .idea/
 .vscode/

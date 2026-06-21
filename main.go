@@ -14,8 +14,18 @@ import (
 )
 
 func main() {
-	// 1. 加载配置
+	// 1. 解析命令行参数
+	config.ParseFlags()
+
+	// 2. 加载配置 (优先级: 命令行参数 > 环境变量 > 配置文件 > 默认值)
 	cfg := config.Load()
+
+	// 输出配置来源（调试用）
+	if configFile := config.ConfigFile(); configFile != "" {
+		log.Printf("[Config] 使用配置文件: %s", configFile)
+	} else {
+		log.Println("[Config] 未使用配置文件，采用环境变量 + 默认值")
+	}
 
 	// 2. 初始化数据库
 	db, err := gorm.Open(mysql.Open(cfg.Database.DSN()), &gorm.Config{})
