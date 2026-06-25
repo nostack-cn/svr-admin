@@ -1,6 +1,7 @@
 # svr-admin 配置文件
 # 优先级: 命令行参数 > 环境变量 > 配置文件 > 默认值
 # 环境变量格式: SECTION_KEY (如 SERVER_PORT, DB_HOST)
+# 敏感项（jwt.secret / profile.internal_key / seed.super_admin_password）建议仅用环境变量注入
 
 server:
   port: 8080
@@ -12,3 +13,17 @@ database:
   user: root
   password: ""
   dbname: svr_admin
+
+jwt:
+  secret: ""        # 通过 JWT_SECRET 注入
+
+# 下游 svr-profile（用户管控编排）
+profile:
+  base_url: ""      # 通过 PROFILE_BASE_URL 注入，如 http://svr-profile:8082
+  internal_key: ""  # 通过 PROFILE_INTERNAL_KEY 注入
+
+# 初始超级管理员（仅首次启动且库中无管理员时创建）
+seed:
+  super_admin_username: admin
+  super_admin_password: ""   # 通过 SEED_SUPER_ADMIN_PASSWORD 注入，留空则不自动创建
+  super_admin_email: admin@nostack.local

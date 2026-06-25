@@ -12,6 +12,34 @@ import (
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
+	JWT      JWTConfig      `mapstructure:"jwt"`
+	Profile  ProfileConfig  `mapstructure:"profile"`
+	Console  ConsoleConfig  `mapstructure:"console"`
+	Seed     SeedConfig     `mapstructure:"seed"`
+}
+
+// ConsoleConfig svr-console 下游服务配置（订阅管控）
+type ConsoleConfig struct {
+	BaseURL     string `mapstructure:"base_url"`
+	InternalKey string `mapstructure:"internal_key"`
+}
+
+// JWTConfig JWT 认证配置
+type JWTConfig struct {
+	Secret string `mapstructure:"secret"`
+}
+
+// ProfileConfig svr-profile 下游服务配置（用户管控编排）
+type ProfileConfig struct {
+	BaseURL     string `mapstructure:"base_url"`
+	InternalKey string `mapstructure:"internal_key"`
+}
+
+// SeedConfig 初始超级管理员种子配置（首次启动自动创建）
+type SeedConfig struct {
+	SuperAdminUsername string `mapstructure:"super_admin_username"`
+	SuperAdminPassword string `mapstructure:"super_admin_password"`
+	SuperAdminEmail    string `mapstructure:"super_admin_email"`
 }
 
 // ServerConfig HTTP 服务配置
@@ -63,6 +91,22 @@ func setupBindings() {
 	bindEnv("database.user", "DB_USER")
 	bindEnv("database.password", "DB_PASSWORD")
 	bindEnv("database.dbname", "DB_NAME")
+
+	// jwt
+	bindEnv("jwt.secret", "JWT_SECRET")
+
+	// profile（下游 svr-profile）
+	bindEnv("profile.base_url", "PROFILE_BASE_URL")
+	bindEnv("profile.internal_key", "PROFILE_INTERNAL_KEY")
+
+	// console（下游 svr-console）
+	bindEnv("console.base_url", "CONSOLE_BASE_URL")
+	bindEnv("console.internal_key", "CONSOLE_INTERNAL_KEY")
+
+	// seed（初始超管，仅首次启动生效）
+	bindEnv("seed.super_admin_username", "SEED_SUPER_ADMIN_USERNAME")
+	bindEnv("seed.super_admin_password", "SEED_SUPER_ADMIN_PASSWORD")
+	bindEnv("seed.super_admin_email", "SEED_SUPER_ADMIN_EMAIL")
 }
 
 // setDefaults 设置默认值
@@ -77,6 +121,22 @@ func setDefaults() {
 	viper.SetDefault("database.user", "root")
 	viper.SetDefault("database.password", "")
 	viper.SetDefault("database.dbname", "svr_admin")
+
+	// jwt
+	viper.SetDefault("jwt.secret", "svr-admin-jwt-secret-change-me")
+
+	// profile
+	viper.SetDefault("profile.base_url", "")
+	viper.SetDefault("profile.internal_key", "")
+
+	// console
+	viper.SetDefault("console.base_url", "")
+	viper.SetDefault("console.internal_key", "")
+
+	// seed
+	viper.SetDefault("seed.super_admin_username", "admin")
+	viper.SetDefault("seed.super_admin_password", "")
+	viper.SetDefault("seed.super_admin_email", "admin@nostack.local")
 }
 
 // Load 加载配置
