@@ -21,6 +21,14 @@ const (
 
 	// 订阅管控（编排 svr-console）
 	PermSubscriptionCancel = "console:subscription:cancel"
+
+	// 博客管理
+	PermBlogRead  = "blog:blog:read"
+	PermBlogWrite = "blog:blog:write"
+
+	// 公告管理
+	PermAnnouncementRead  = "announcement:announcement:read"
+	PermAnnouncementWrite = "announcement:announcement:write"
 )
 
 // AllPermissions 返回系统全部权限点定义（用于种子数据与权限点列表展示）
@@ -39,6 +47,10 @@ func AllPermissions() []PermissionDef {
 		{Code: PermOrderRead, Name: "查看订单", Group: "订单管理"},
 		{Code: PermOrderRefund, Name: "订单退款", Group: "订单管理"},
 		{Code: PermSubscriptionCancel, Name: "取消用户订阅", Group: "订阅管理"},
+		{Code: PermBlogRead, Name: "查看博客", Group: "内容管理"},
+		{Code: PermBlogWrite, Name: "管理博客", Group: "内容管理"},
+		{Code: PermAnnouncementRead, Name: "查看公告", Group: "内容管理"},
+		{Code: PermAnnouncementWrite, Name: "管理公告", Group: "内容管理"},
 	}
 }
 

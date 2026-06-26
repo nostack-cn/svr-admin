@@ -15,6 +15,7 @@ import (
 	"github.com/nostack-cn/svr-admin/pkg/auth"
 	"github.com/nostack-cn/svr-admin/pkg/consoleclient"
 	"github.com/nostack-cn/svr-admin/pkg/profile"
+	"github.com/nostack-cn/svr-admin/pkg/upload"
 	"github.com/nostack-cn/svr-admin/router"
 	"github.com/nostack-cn/svr-admin/service"
 )
@@ -50,6 +51,15 @@ func main() {
 	auditService := service.NewAuditService(db)
 	userAdminService := service.NewUserAdminService(profileClient)
 	orderAdminService := service.NewOrderAdminService(profileClient, consoleClient)
+	blogService := service.NewBlogService(db)
+	announcementService := service.NewAnnouncementService(db)
+
+	// 文件上传器
+	maxSize := int64(cfg.Blog.MaxSizeMB) * 1024 * 1024
+	if maxSize <= 0 {
+		maxSize = 50 * 1024 * 1024
+	}
+	uploader := upload.NewUploader(cfg.Blog.UploadDir, cfg.Blog.UploadURL, maxSize)
 
 	// 5. 初始化 RBAC 种子数据与初始超管
 	if err := seed(cfg, rbacService, adminService); err != nil {
@@ -57,13 +67,16 @@ func main() {
 	}
 
 	// 6. 组装 Handler
+	blogHandler := handler.NewBlogHandler(blogService, uploader)
 	handlers := &router.Handlers{
-		Auth:  handler.NewAuthHandler(adminService),
-		Admin: handler.NewAdminHandler(adminService),
-		RBAC:  handler.NewRBACHandler(rbacService),
-		User:  handler.NewUserHandler(userAdminService),
-		Order: handler.NewOrderHandler(orderAdminService),
-		Log:   handler.NewLogHandler(auditService),
+		Auth:         handler.NewAuthHandler(adminService),
+		Admin:        handler.NewAdminHandler(adminService),
+		RBAC:         handler.NewRBACHandler(rbacService),
+		User:         handler.NewUserHandler(userAdminService),
+		Order:        handler.NewOrderHandler(orderAdminService),
+		Log:          handler.NewLogHandler(auditService),
+		Blog:         blogHandler,
+		Announcement: handler.NewAnnouncementHandler(announcementService),
 	}
 
 	// 7. 定时任务
@@ -74,7 +87,15 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
-	router.Setup(r, handlers, jwtMgr, auditService)
+
+	// 静态文件：上传文件访问
+	r.Static(cfg.Blog.UploadURL, cfg.Blog.UploadDir)
+
+	// HTML 模板：后台管理页面
+	r.LoadHTMLGlob("web/admin/*.html")
+	r.GET("/admin/blog", blogHandler.ServeAdminPage)
+
+	router.Setup(r, handlers, jwtMgr, auditService, cfg.Blog.InternalKey, cfg.Announcement.InternalKey)
 
 	// 9. 启动
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -91,6 +112,8 @@ func autoMigrate(db *gorm.DB) error {
 		&model.Role{},
 		&model.Admin{},
 		&model.AdminOperationLog{},
+		&model.Blog{},
+		&model.Announcement{},
 	)
 }
 

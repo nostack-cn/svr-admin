@@ -16,6 +16,8 @@ type Config struct {
 	Profile  ProfileConfig  `mapstructure:"profile"`
 	Console  ConsoleConfig  `mapstructure:"console"`
 	Seed     SeedConfig     `mapstructure:"seed"`
+	Blog         BlogConfig         `mapstructure:"blog"`
+	Announcement AnnouncementConfig `mapstructure:"announcement"`
 }
 
 // ConsoleConfig svr-console 下游服务配置（订阅管控）
@@ -32,6 +34,19 @@ type JWTConfig struct {
 // ProfileConfig svr-profile 下游服务配置（用户管控编排）
 type ProfileConfig struct {
 	BaseURL     string `mapstructure:"base_url"`
+	InternalKey string `mapstructure:"internal_key"`
+}
+
+// BlogConfig 博客配置
+type BlogConfig struct {
+	UploadDir   string `mapstructure:"upload_dir"`
+	UploadURL   string `mapstructure:"upload_url"`
+	MaxSizeMB   int    `mapstructure:"max_size_mb"`
+	InternalKey string `mapstructure:"internal_key"`
+}
+
+// AnnouncementConfig 公告配置
+type AnnouncementConfig struct {
 	InternalKey string `mapstructure:"internal_key"`
 }
 
@@ -103,6 +118,15 @@ func setupBindings() {
 	bindEnv("console.base_url", "CONSOLE_BASE_URL")
 	bindEnv("console.internal_key", "CONSOLE_INTERNAL_KEY")
 
+	// blog
+	bindEnv("blog.upload_dir", "BLOG_UPLOAD_DIR")
+	bindEnv("blog.upload_url", "BLOG_UPLOAD_URL")
+	bindEnv("blog.max_size_mb", "BLOG_MAX_SIZE_MB")
+	bindEnv("blog.internal_key", "BLOG_INTERNAL_KEY")
+
+	// announcement
+	bindEnv("announcement.internal_key", "ANNOUNCEMENT_INTERNAL_KEY")
+
 	// seed（初始超管，仅首次启动生效）
 	bindEnv("seed.super_admin_username", "SEED_SUPER_ADMIN_USERNAME")
 	bindEnv("seed.super_admin_password", "SEED_SUPER_ADMIN_PASSWORD")
@@ -132,6 +156,15 @@ func setDefaults() {
 	// console
 	viper.SetDefault("console.base_url", "")
 	viper.SetDefault("console.internal_key", "")
+
+	// blog
+	viper.SetDefault("blog.upload_dir", "./uploads")
+	viper.SetDefault("blog.upload_url", "/uploads")
+	viper.SetDefault("blog.max_size_mb", 50)
+	viper.SetDefault("blog.internal_key", "")
+
+	// announcement
+	viper.SetDefault("announcement.internal_key", "")
 
 	// seed
 	viper.SetDefault("seed.super_admin_username", "admin")

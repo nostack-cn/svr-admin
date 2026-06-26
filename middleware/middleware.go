@@ -153,6 +153,19 @@ func GetAdminPermissions(c *gin.Context) []string {
 	return nil
 }
 
+// InternalAuth 内部服务鉴权中间件（X-Internal-Key）
+func InternalAuth(internalKey string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		key := c.GetHeader("X-Internal-Key")
+		if key == "" || internalKey == "" || key != internalKey {
+			response.Unauthorized(c, "内部服务鉴权失败")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
 // CORS 跨域中间件
 func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
