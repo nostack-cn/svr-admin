@@ -207,6 +207,35 @@ func (h *BlogHandler) InternalListTags(c *gin.Context) {
 	response.OK(c, tags)
 }
 
+// ======================== 公开接口（无需鉴权，仅返回已发布内容） ========================
+
+// PublicListBlogs GET /api/v1/public/blogs
+func (h *BlogHandler) PublicListBlogs(c *gin.Context) {
+	p := pagination.Parse(c)
+	tag := c.Query("tag")
+	blogs, total, err := h.blogService.ListPublished(p.Page, p.PageSize, tag)
+	if err != nil {
+		response.InternalError(c, "查询博客列表失败")
+		return
+	}
+	response.OKPage(c, blogs, total, p.Page, p.PageSize)
+}
+
+// PublicGetBlogBySlug GET /api/v1/public/blogs/slug/:slug
+func (h *BlogHandler) PublicGetBlogBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+	if slug == "" {
+		response.BadRequest(c, "无效的博客标识")
+		return
+	}
+	blog, err := h.blogService.GetBySlug(slug, true)
+	if err != nil {
+		response.NotFound(c, err.Error())
+		return
+	}
+	response.OK(c, blog)
+}
+
 func parseUint(c *gin.Context, key string) uint {
 	var id uint
 	if v := c.Param(key); v != "" {

@@ -104,6 +104,13 @@ func Setup(r *gin.Engine, h *Handlers, jwtMgr *auth.JWTManager, auditSvc *servic
 		}
 	}
 
+	// --- 公开 API（无需鉴权，仅返回已发布内容） ---
+	public := r.Group("/api/v1/public")
+	{
+		public.GET("/blogs", h.Blog.PublicListBlogs)
+		public.GET("/blogs/slug/:slug", h.Blog.PublicGetBlogBySlug)
+	}
+
 	// --- 内部 API（X-Internal-Key 鉴权，供 web-site 等内部服务调用） ---
 	internal := r.Group("/internal")
 	internal.Use(middleware.InternalAuth(blogInternalKey))
