@@ -66,6 +66,12 @@ coverage: ## 测试覆盖率
 	go test -v -race -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 
+# ---------- 种子数据 ----------
+
+.PHONY: seed-blog
+seed-blog: ## 填充博客种子数据（3篇域名/SSL文章）
+	go run ./seed/blog_seed.go
+
 # ---------- 清理 ----------
 
 .PHONY: clean
